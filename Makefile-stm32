@@ -22,7 +22,7 @@ LPATH 	= /home/zj/Templates/stm32f10x
 ################################################################
 #BUILD   = debug
 BUILD   = release
-BUILD_LIB = yes
+BUILD_LIB = no
 ################################################################
 
 ifeq '$(BUILD)'  'debug'
