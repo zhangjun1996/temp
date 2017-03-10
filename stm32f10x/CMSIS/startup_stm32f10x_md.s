@@ -104,7 +104,7 @@ LoopFillZerobss:
  * @param  None     
  * @retval None       
 */
-    .section	.text.Default_Handler,"ax",%progbits
+	.section	.text.Default_Handler,"ax",%progbits
 Default_Handler:
 Infinite_Loop:
 	b	Infinite_Loop
@@ -116,7 +116,7 @@ Infinite_Loop:
 * 0x0000.0000.
 *
 ******************************************************************************/    
- 	.section	.isr_vector,"a",%progbits
+	.section	.isr_vector,"a",%progbits
 	.type	g_pfnVectors, %object
 	.size	g_pfnVectors, .-g_pfnVectors
     
@@ -181,7 +181,7 @@ g_pfnVectors:
 	.word	EXTI15_10_IRQHandler
 	.word	RTCAlarm_IRQHandler
 	.word	USBWakeUp_IRQHandler	
-  .word	0
+	.word	0
 	.word	0
 	.word	0
 	.word	0
@@ -199,16 +199,16 @@ g_pfnVectors:
 *
 *******************************************************************************/
     
-  .weak	NMI_Handler
+	.weak	NMI_Handler
 	.thumb_set NMI_Handler,Default_Handler
-	
-  .weak	HardFault_Handler
+
+	.weak	HardFault_Handler
 	.thumb_set HardFault_Handler,Default_Handler
-	
-  .weak	MemManage_Handler
+
+	.weak	MemManage_Handler
 	.thumb_set MemManage_Handler,Default_Handler
-	
-  .weak	BusFault_Handler
+
+	.weak	BusFault_Handler
 	.thumb_set BusFault_Handler,Default_Handler
 
 	.weak	UsageFault_Handler

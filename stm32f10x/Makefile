@@ -8,17 +8,22 @@ SIZE 	= $(PREFIX)size
 OBJDUMP = $(PREFIX)objdump
 OBJCPY 	= $(PREFIX)objcopy
 
+LIBS    = stm32
 DEVICE 	=  -mcpu=cortex-m3 -mthumb -ffunction-sections -fdata-sections
-CFLAGS 	= $(DEVICE)  -DSTM32F10X_MD
-CXXFLAGS= $(DEVICE)  -DSTM32F10X_MD
+CFLAGS 	= $(DEVICE) $(patsubst %, -I"%", $(CPATH)) -DSTM32F10X_MD
+CXXFLAGS= $(CFLAGS)
 AFLAGS 	= $(DEVICE)  -c -x assembler-with-cpp
 LFLAGS 	= $(DEVICE)  -Wl,-gc-sections,-Map=$(TARGET).map,-cref,-u,Reset_Handler \
-	  -T "$(ROOT_DIR)/stm32f103c8t6.ld" -nostartfiles
+	  -T "/home/zj/Templates/stm32f103c8t6.ld" -nostartfiles $(patsubst %, -l%, $(LIBS)) \
+	  $(patsubst %, -L"%", $(LPATH))
 
-CPATH 	= 
-LPATH 	= 
-BUILD   = debug
-#BUILD   = release
+CPATH 	= $(patsubst %, /home/zj/Templates/stm32f10x/%, CMSIS lib/inc)
+LPATH 	= /home/zj/Templates/stm32f10x
+################################################################
+#BUILD   = debug
+BUILD   = release
+BUILD_LIB = yes
+################################################################
 
 ifeq '$(BUILD)'  'debug'
 	CFLAGS +=  -O0 -gdwarf-2
@@ -27,11 +32,15 @@ else
 	CFLAGS +=  -O2
 endif
 
-ROOT_DIR = /home/zj/Templates/stm32f10x
+ROOT_DIR = $(shell pwd)
 SUB_DIR = ${shell ls -l "${ROOT_DIR}" | grep ^d | awk '{if($$9 != "build") print $$9 }'}
-BUILD_DIR = build
+################################################################
+BUILD_DIR = $(ROOT_DIR)/build/$(BUILD)
+BUILD_LIB_DIR =$(ROOT_DIR)
+################################################################
 TARGET = stm32
-export CC CPP AS AR LINK SIZE OBJDUMP OBJCPY DEVICE CFLAGS CXXFLAGS ASFLAGS LFLAGS BUILD ROOT_DIR BUILD_DIR
+export CC CPP AS AR LINK SIZE OBJDUMP OBJCPY DEVICE CFLAGS CXXFLAGS ASFLAGS LFLAGS ROOT_DIR \
+       	BUILD BUILD_DIR BUILD_LIB_DIR
 
 SRC_FILE = ${wildcard *.c}
 SRC_FILE += ${wildcard *.cpp}
@@ -65,14 +74,23 @@ $(SUB_DIR):ECHO
 %.o:%.s
 	${AS} ${ASFLAGS}   -c "$^" -o "${BUILD_DIR}/$@"
 
+ifneq "$(BUILD_LIB)" "yes"
+
 $(TARGET): $(SUB_DIR) $(OBJ_FILE)
-	cd "${BUILD_DIR}"  && ${CC} ${LFLAGS} $(filter %.o, $(shell  ls "$(BUILD_DIR)")) -o "$(TARGET)" \
-		&& ${SIZE}  -d "$(TARGET)"
+	cd "${BUILD_DIR}"  && ${CC} ${LFLAGS} $(filter %.o, $(shell  ls "$(BUILD_DIR)")) -o "$(ROOT_DIR)/$(TARGET)" 
+	${SIZE}  -d "$(TARGET)"
+	
+else
+
+$(TARGET): $(SUB_DIR) $(OBJ_FILE)
+	cd "${BUILD_DIR}"  && ${AR} -ru "$(BUILD_LIB_DIR)/lib${TARGET}.a" $(filter %.o, $(shell  ls "$(BUILD_DIR)"))
+
+endif
 
 ECHO:
 	@echo ${SUB_DIR}
 
 clean:
-	-cd ${BUILD_DIR}&&rm *
+	-cd "${BUILD_DIR}" && rm *
 
 .PHONY: all

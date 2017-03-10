@@ -9,8 +9,6 @@ TMP += ${patsubst %.cpp, %.o, ${SRC_FILE}}
 TMP += ${patsubst %.s, %.o, ${SRC_FILE}}
 OBJ_FILE = $(filter %.o, $(TMP))
 
-CFLAGS += -I $(shell pwd)/inc -I $(ROOT_DIR)/CMSIS
-export CFLAGS
 all: ${SUB_DIR} ${OBJ_FILE}
 
 

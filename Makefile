@@ -8,30 +8,38 @@ SIZE 	= $(PREFIX)size
 OBJDUMP = $(PREFIX)objdump
 OBJCPY 	= $(PREFIX)objcopy
 
+LIBS    = 
 DEVICE 	= 
-CFLAGS 	= $(DEVICE) 
-CXXFLAGS= $(DEVICE)  
-AFLAGS 	= $(DEVICE)  
-LFLAGS 	= $(DEVICE) -Wl,--gcsections,_map=${TARGET}.map
+CFLAGS 	= $(DEVICE) $(patsubst %, -I"%", $(CPATH)) 
+CXXFLAGS= $(CFLAGS)
+AFLAGS 	= $(DEVICE)
+LFLAGS 	= $(DEVICE)  -Wl,-gc-sections,-Map=$(TARGET).map $(patsubst %, -l%, $(LIBS)) \
+	  $(patsubst %, -L"%", $(LPATH))
 
 CPATH 	= 
-LPATH 	= 
+LPATH 	= $(BUILD_LIB_DIR)
+################################################################
 BUILD   = debug
+#BUILD   = release
+BUILD_LIB = no
+################################################################
 
 ifeq '$(BUILD)'  'debug'
 	CFLAGS +=  -O0 -gdwarf-2
-	CXXFLAGS += -O0
 	AFLAGS +=  -gdwarf-2
 else
 	CFLAGS +=  -O2
-	CXXFLAGS += -O2
 endif
 
-ROOT_DIR = ${shell pwd}
+ROOT_DIR = $(shell pwd)
 SUB_DIR = ${shell ls -l "${ROOT_DIR}" | grep ^d | awk '{if($$9 != "build") print $$9 }'}
-BUILD_DIR = build
+################################################################
+BUILD_DIR = $(ROOT_DIR)/build/$(BUILD)
+BUILD_LIB_DIR = $(ROOT_DIR)
+################################################################
 TARGET = test
-export CC CPP AS AR LINK SIZE OBJDUMP OBJCPY DEVICE CFLAGS CXXFLAGS ASFLAGS LFLAGS BUILD ROOT_DIR BUILD_DIR
+export CC CPP AS AR LINK SIZE OBJDUMP OBJCPY DEVICE CFLAGS CXXFLAGS ASFLAGS LFLAGS ROOT_DIR \
+       	BUILD BUILD_DIR BUILD_LIB_DIR
 
 SRC_FILE = ${wildcard *.c}
 SRC_FILE += ${wildcard *.cpp}
@@ -65,14 +73,21 @@ $(SUB_DIR):ECHO
 %.o:%.s
 	${AS} ${ASFLAGS}   -c "$^" -o "${BUILD_DIR}/$@"
 
+ifneq "$(BUILD_LIB)" "yes"
 $(TARGET): $(SUB_DIR) $(OBJ_FILE)
-	cd "${BUILD_DIR}"  && ${CC} ${LFLAGS} $(filter %.o, $(shell  ls "$(BUILD_DIR)")) -o "$(TARGET)" \
-		&& ${SIZE}  -d "$(TARGET)"
+	cd "${BUILD_DIR}"  && ${CC} ${LFLAGS} $(filter %.o, $(shell  ls "$(BUILD_DIR)")) -o "$(ROOT_DIR)/$(TARGET)" 
+	${SIZE}  -d "$(TARGET)"
+	
+else
+$(TARGET): $(SUB_DIR) $(OBJ_FILE)
+	cd "${BUILD_DIR}"  && ${AR} -ru "$(BUILD_LIB_DIR)/lib${TARGET}.a" $(filter %.o, $(shell  ls "$(BUILD_DIR)"))
+
+endif
 
 ECHO:
-	@echo ${SUB_DIR}
+	@echo "${SUB_DIR}"
 
 clean:
-	-cd ${BUILD_DIR}&&rm *
+	-cd "${BUILD_DIR}" && rm *
 
 .PHONY: all
