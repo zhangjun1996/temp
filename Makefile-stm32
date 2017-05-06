@@ -13,7 +13,7 @@ DEVICE 	=  -mcpu=cortex-m3 -mthumb -ffunction-sections -fdata-sections
 CFLAGS 	= $(DEVICE) $(patsubst %, -I"%", $(CPATH)) -DSTM32F10X_MD
 CXXFLAGS= $(CFLAGS)
 AFLAGS 	= $(DEVICE)  -c -x assembler-with-cpp
-LFLAGS 	= $(DEVICE)  -Wl,-gc-sections,-Map=$(TARGET).map,-cref,-u,Reset_Handler \
+LFLAGS 	= $(DEVICE)  -Wl,-Map=$(TARGET).map,-cref,-u,Reset_Handler \
 	  -T "/home/zj/Templates/stm32f103c8t6.ld" -nostartfiles $(patsubst %, -l%, $(LIBS)) \
 	  $(patsubst %, -L"%", $(LPATH))
 
@@ -97,7 +97,8 @@ flash:
 	stm32flash -w stm32.hex /dev/ttyUSB0
 
 run:
-	-openocd -f /usr/share/openocd/scripts/interface/stlink-v2.cfg  -f /usr/share/openocd/scripts/target/stm32f1x.cfg > /dev/null 2>&1 &
+#	-openocd -f /usr/share/openocd/scripts/interface/stlink-v2.cfg  -f /usr/share/openocd/scripts/target/stm32f1x.cfg > /dev/null 2>&1 &
+	openocd -f ~/Templates/openocd.cfg > /dev/null 2>&1 &
 	(sleep 1 && echo -e "reset halt" && sleep 2 && echo "flash write_image erase ${TARGET}.bin 0x8000000"  && sleep 3) | telnet 127.0.0.1 4444
 	#(sleep 1 && echo -e "reset halt" && sleep 3) | telnet 127.0.0.1 4444
 	arm-none-eabi-gdb ${TARGET} -ex "tar ext localhost:3333" -ex "b main" -ex "lay n" -ex "lay n" -ex "lay n" -ex "monitor reset halt" -ex c
