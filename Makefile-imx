@@ -8,17 +8,17 @@ SIZE 	= $(PREFIX)size
 OBJDUMP = $(PREFIX)objdump
 OBJCPY 	= $(PREFIX)objcopy
 
-LIBS    = stm32
-DEVICE 	=  -mcpu=cortex-m3 -mthumb -ffunction-sections -fdata-sections
-CFLAGS 	= $(DEVICE) $(patsubst %, -I"%", $(CPATH)) -DSTM32F10X_MD
+LIBS    = 
+DEVICE 	=  -mcpu=arm926ej-s -mthumb -ffunction-sections -fdata-sections
+CFLAGS 	= $(DEVICE) $(patsubst %, -I"%", $(CPATH)) 
 CXXFLAGS= $(CFLAGS)
 AFLAGS 	= $(DEVICE)  -c -x assembler-with-cpp
 LFLAGS 	= $(DEVICE)  -Wl,-Map=$(TARGET).map,-cref,-u,Reset_Handler \
-	  -T "/home/zj/Templates/stm32f103c8t6.ld" -nostartfiles $(patsubst %, -l%, $(LIBS)) \
+	  -T "ld" -nostartfiles $(patsubst %, -l%, $(LIBS)) \
 	  $(patsubst %, -L"%", $(LPATH))
 
-CPATH 	= $(patsubst %, /home/zj/stm32f10x/include/%, stm32f10x tft)
-LPATH 	= /home/zj/stm32f10x/lib
+CPATH 	= 
+LPATH 	= 
 ################################################################
 BUILD   = debug
 #BUILD   = release
@@ -39,7 +39,7 @@ SUB_DIR = ${shell ls -l "${ROOT_DIR}" | grep ^d | awk '{if($$9 != "build") print
 BUILD_DIR = $(ROOT_DIR)/build/$(BUILD)
 BUILD_LIB_DIR =$(LPATH)
 ################################################################
-TARGET = stm32
+TARGET = rtthread
 export CC CPP AS AR LINK SIZE OBJDUMP OBJCPY DEVICE CFLAGS CXXFLAGS ASFLAGS LFLAGS ROOT_DIR \
        	BUILD BUILD_DIR BUILD_LIB_DIR
 
@@ -93,33 +93,27 @@ endif
 ECHO:
 	@echo ${SUB_DIR}
 
-flash:
-	stm32flash -w stm32.hex /dev/ttyUSB0
 
-
-#DEBUG_INTERFACE = jlink
+DEBUG_INTERFACE = jlink
 #DEBUG_INTERFACE = stlink-v2
-DEBUG_INTERFACE = ftdi/openjtag
+#DEBUG_INTERFACE = ftdi/openjtag
 
-DEBUG_TARGET = stm32f1x
+DEBUG_TARGET = imx28
 
-run:	
+run:
 	setsid openocd -f /usr/share/openocd/scripts/interface/$(DEBUG_INTERFACE).cfg \
 	       	-f /usr/share/openocd/scripts/target/$(DEBUG_TARGET).cfg > /dev/null 2>&1 &
 #	(sleep 1 && echo -e "halt" && sleep 1) | telnet 127.0.0.1 4444
-	arm-none-eabi-gdb ${TARGET} -ex "tar ext 127.0.0.1:3333" -ex "b main" \
-	       	-ex "lay n" -ex "lay n" -ex "lay n" -ex "monitor reset halt" -ex c
-	#arm-none-eabi-gdb ${TARGET} -ex "tar ext 127.0.0.1:3333" -ex "b main" -ex "lay n" -ex "lay n" -ex "lay n"
+	arm-none-eabi-gdb ${TARGET} -ex "tar ext localhost:3333" -ex "monitor halt" -ex "monitor step 0x40000000" \
+		-ex "b entry" -ex "lay n" -ex "lay n" -ex "lay n" 
+	#arm-none-eabi-gdb ${TARGET} -ex "tar ext localhost:3333" -ex "b main" -ex "lay n" -ex "lay n" -ex "lay n"
 	pid=`ps -C openocd -o pid --noheader` && kill -9 $$pid
 
 programe:
 	setsid 	openocd -f /usr/share/openocd/scripts/interface/$(DEBUG_INTERFACE).cfg \
 	       	-f /usr/share/openocd/scripts/target/$(DEBUG_TARGET).cfg > /dev/null 2>&1 &
-	(echo -e "reset halt" && sleep 1 && echo "flash write_image erase ${TARGET}.bin 0x8000000"  && sleep 3) | telnet 127.0.0.1 4444
-	#arm-none-eabi-gdb ${TARGET} -ex "tar ext 127.0.0.1:3333" -ex "b main" -ex "lay n" -ex "lay n" -ex "lay n"
+	(echo -e "halt" && echo "load_image ${TARGET}.bin 0x40000000"  && sleep 5) | telnet 127.0.0.1 4444
 	pid=`ps -C openocd -o pid --noheader` && kill -9 $$pid
-
-programe:
 
 clean:
 	-cd "${BUILD_DIR}" && rm *
