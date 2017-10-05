@@ -2,7 +2,7 @@ MEMORY
 {
 
 	/* ROM 是可读的(r)和可执行的(x) */
-	rom (rx)  : ORIGIN = 0, LENGTH = 128K
+	rom (rx)  : ORIGIN = 0x8000000, LENGTH = 128K
 	/* RAM 是可读的(r),可写的(w),可执行的(x) */
 	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 20K
 }
@@ -12,15 +12,15 @@ _system_stack_size = 0x100;
 SECTIONS
 {
 
-	. = 0x0;
+	. = 0x8000000;
 	/* 从 0x00000000 开始 */
 	.text : {
 		. = ALIGN(4);
 		_stext = .;
 		KEEP(*(.isr_vector)) /* 向量表 */
 		. = ALIGN(4);
-		*(.text) /* 程序代码 */
-		*(.rodata) /* 只读数据 */
+		*(.text) 	     /* 程序代码 */
+		*(.rodata)           /* 只读数据 */
 	} > rom = 0
 	__exdix_start = .;
 	.ARM.exidx :

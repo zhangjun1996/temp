@@ -2,7 +2,7 @@ MEMORY
 {
 
 	/* ROM 是可读的(r)和可执行的(x) */
-	rom (rx)  : ORIGIN = 0, LENGTH = 512K
+	rom (rx)  : ORIGIN = 0x8000000, LENGTH = 512K
 	/* RAM 是可读的(r),可写的(w),可执行的(x) */
 	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }

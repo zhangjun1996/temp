@@ -55,10 +55,10 @@ OBJ_FILE = $(filter %.o, $(TMP))
 
 
 # Attempt to create a output directory.
-$(shell [ -d ${BUILD_DIR} ]  || mkdir -p ${BUILD_DIR})
+$(shell [ -d "${BUILD_DIR}" ]  || mkdir -p "${BUILD_DIR}")
 # Verify if it was successful.
-BUILD_DIR := $(shell cd $(BUILD_DIR) && /bin/pwd)
-$(if $(BUILD_DIR),,$(error output directory "$(saved-output)" does not exist))
+BUILD_DIR := $(shell cd "$(BUILD_DIR)" && /bin/pwd)
+$(if "$(BUILD_DIR)",,$(error output directory "$(saved-output)" does not exist))
 
 all: $(TARGET)
 
@@ -98,8 +98,8 @@ flash:
 
 
 #DEBUG_INTERFACE = jlink
-#DEBUG_INTERFACE = stlink-v2
-DEBUG_INTERFACE = ftdi/openjtag
+DEBUG_INTERFACE = stlink-v2
+#DEBUG_INTERFACE = ftdi/openjtag
 
 DEBUG_TARGET = stm32f1x
 
@@ -110,14 +110,16 @@ run:
 	arm-none-eabi-gdb ${TARGET} -ex "tar ext 127.0.0.1:3333" -ex "b main" \
 	       	-ex "lay n" -ex "lay n" -ex "lay n" -ex "monitor reset halt" -ex c
 	#arm-none-eabi-gdb ${TARGET} -ex "tar ext 127.0.0.1:3333" -ex "b main" -ex "lay n" -ex "lay n" -ex "lay n"
-	pid=`ps -C openocd -o pid --noheader` && kill -9 $$pid
+	#pid=`ps -C openocd -o pid --noheader` && kill -9 $$pid
+	killall openocd
 
 programe:
 	setsid 	openocd -f /usr/share/openocd/scripts/interface/$(DEBUG_INTERFACE).cfg \
 	       	-f /usr/share/openocd/scripts/target/$(DEBUG_TARGET).cfg > /dev/null 2>&1 &
-	(echo -e "reset halt" && sleep 1 && echo "flash write_image erase ${TARGET}.bin 0x8000000"  && sleep 3) | telnet 127.0.0.1 4444
-	#arm-none-eabi-gdb ${TARGET} -ex "tar ext 127.0.0.1:3333" -ex "b main" -ex "lay n" -ex "lay n" -ex "lay n"
-	pid=`ps -C openocd -o pid --noheader` && kill -9 $$pid
+	#(echo -e "reset halt" && sleep 1 && echo "flash write_image erase ${TARGET}.bin 0x8000000"  && sleep 3) | telnet 127.0.0.1 4444
+	arm-none-eabi-gdb ${TARGET} -ex "tar ext 127.0.0.1:3333" -ex "monitor  stm32f1x mass_erase 0 " -ex "load"
+	#pid=`ps -C openocd -o pid --noheader` && kill -9 $$pid
+	killall openocd
 
 programe:
 
