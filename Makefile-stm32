@@ -97,34 +97,46 @@ flash:
 	stm32flash -w stm32.hex /dev/ttyUSB0
 
 
-#DEBUG_INTERFACE = jlink
-DEBUG_INTERFACE = stlink-v2
+DEBUG_INTERFACE = jlink
+#DEBUG_INTERFACE = stlink-v2
 #DEBUG_INTERFACE = ftdi/openjtag
-
 DEBUG_TARGET = stm32f1x
+RUN_OPENOCD = setsid 	openocd
+RUN_OPENOCD += -f /usr/share/openocd/scripts/interface/$(DEBUG_INTERFACE).cfg
+RUN_OPENOCD += -c "transport select swd" 
+RUN_OPENOCD += -f /usr/share/openocd/scripts/target/$(DEBUG_TARGET).cfg 
+RUN_OPENOCD += > /dev/null 2>&1 &
+	
+
+GDB_RUN = -ex "tar ext 127.0.0.1:3333" 
+GDB_RUN += -ex "b main" 
+GDB_RUN += -ex "lay n" 
+GDB_RUN += -ex "lay n" 
+GDB_RUN += -ex "lay n" 
+GDB_RUN += -ex "monitor reset halt" -ex c
+
+GDB_PROG = -ex "tar ext 127.0.0.1:3333" 
+GDB_PROG += -ex "load"
+#GDB_PROG +=-ex "monitor  stm32f1x mass_erase 0 " 
+GDB_PROG += -ex "monitor reset"
+
 
 run:	
-	setsid openocd -f /usr/share/openocd/scripts/interface/$(DEBUG_INTERFACE).cfg \
-	       	-f /usr/share/openocd/scripts/target/$(DEBUG_TARGET).cfg > /dev/null 2>&1 &
+	${RUN_OPENOCD}
 #	(sleep 1 && echo -e "halt" && sleep 1) | telnet 127.0.0.1 4444
-	arm-none-eabi-gdb ${TARGET} -ex "tar ext 127.0.0.1:3333" -ex "b main" \
-	       	-ex "lay n" -ex "lay n" -ex "lay n" -ex "monitor reset halt" -ex c
+	arm-none-eabi-gdb ${TARGET} ${GDB_RUN}
 	#arm-none-eabi-gdb ${TARGET} -ex "tar ext 127.0.0.1:3333" -ex "b main" -ex "lay n" -ex "lay n" -ex "lay n"
 	#pid=`ps -C openocd -o pid --noheader` && kill -9 $$pid
 	killall openocd
 
 programe:
-	setsid 	openocd -f /usr/share/openocd/scripts/interface/$(DEBUG_INTERFACE).cfg \
-	       	-f /usr/share/openocd/scripts/target/$(DEBUG_TARGET).cfg > /dev/null 2>&1 &
+	${RUN_OPENOCD}
 	#(echo -e "reset halt" && sleep 1 && echo "flash write_image erase ${TARGET}.bin 0x8000000"  && sleep 3) | telnet 127.0.0.1 4444
-	arm-none-eabi-gdb ${TARGET} -ex "tar ext 127.0.0.1:3333" -ex "monitor  stm32f1x mass_erase 0 " -ex "load"
+	arm-none-eabi-gdb ${TARGET} ${GDB_PROG}
 	#pid=`ps -C openocd -o pid --noheader` && kill -9 $$pid
 	killall openocd
 
-programe:
-
 clean:
-	-cd "${BUILD_DIR}" && rm *
-	-rm stm32*
+	scons -c
 
 .PHONY: all

@@ -38,7 +38,7 @@ BUILD_DIR = $(ROOT_DIR)/build/$(BUILD)
 BUILD_LIB_DIR = $(ROOT_DIR)
 ################################################################
 TARGET = test
-export CC CPP AS AR LINK SIZE OBJDUMP OBJCPY DEVICE CFLAGS CXXFLAGS ASFLAGS LFLAGS ROOT_DIR \
+export CC CPP AS AR LINK SIZE OBJDUMP OBJCPY DEVICE CFLAGS CXXFLAGS AFLAGS LFLAGS ROOT_DIR \
        	BUILD BUILD_DIR BUILD_LIB_DIR
 
 SRC_FILE = ${wildcard *.c}
@@ -71,7 +71,7 @@ $(SUB_DIR):ECHO
 	${CC} ${CFLAGS}    -c "$^" -o "${BUILD_DIR}/$@"
 
 %.o:%.s
-	${AS} ${ASFLAGS}   -c "$^" -o "${BUILD_DIR}/$@"
+	${AS} ${AFLAGS}   -c "$^" -o "${BUILD_DIR}/$@"
 
 ifneq "$(BUILD_LIB)" "yes"
 $(TARGET): $(SUB_DIR) $(OBJ_FILE)
