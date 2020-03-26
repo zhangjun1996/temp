@@ -168,6 +168,7 @@ nmap <F5> :!make programe<CR>
 nmap <F6> :!vifm .<CR>
 nmap T :tabnew<CR>
 set ts=4
+set sw=4
 "set expandtab
 "%retab!
 "set background=light
