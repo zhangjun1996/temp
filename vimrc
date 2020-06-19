@@ -174,4 +174,6 @@ set sw=4
 "set background=light
 "siwtch 与 case对齐
 set cino+=:2
+"鼠标在编辑模式可以复制
+set mouse=n
 
