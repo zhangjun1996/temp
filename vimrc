@@ -161,7 +161,7 @@ set belloff=all
 nmap m :Man 3  <C-R>=expand("<cword>")<CR><CR>
 "空格翻页
 nmap <Space> <C-D>
-nmap <F2> :sh<CR>
+nmap <F2> :zsh<CR>
 nmap <F3> :!make<CR>
 nmap <F4> :!make run<CR>
 nmap <F5> :!make programe<CR>
@@ -169,8 +169,8 @@ nmap <F6> :!vifm .<CR>
 nmap T :tabnew<CR>
 set ts=4
 set sw=4
-"set expandtab
-"%retab!
+set expandtab
+%retab!
 "set background=light
 "siwtch 与 case对齐
 set cino+=:2
