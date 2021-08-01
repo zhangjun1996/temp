@@ -1,0 +1,8 @@
+#!/bin/sh
+
+t () {
+wget -qO- "http://fanyi.youdao.com/openapi.do?keyfrom=leecade&key=54015339&type=data&doctype=json&version=1.1&q=$1" | grep --color=auto -oP '(?<="translation":\[")[^"]*'
+}
+
+t()
+

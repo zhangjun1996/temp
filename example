@@ -1,0 +1,47 @@
+#!/bin/sh
+#for i in {1..100}
+#for i in `seq 1 100`
+#declare -i sum=1
+#for ((i=1; i<=100; i++))
+#do
+#	#sum=$(($sum * $i))
+#	#sum=${sum}*$i
+#	echo $i
+#	sum=`expr $sum \* $i`
+#	#sum=$[$sum * $i]
+#	#let sum=sum * $i
+#done
+
+for file in `ls`
+do
+	file_info=`file $file | grep ISO-8859` 
+	if [ -n "$file_info" ]
+	then
+		echo $file
+		iconv -f gb18030 -c -t utf-8 $file -o tmp;mv tmp $file;
+	fi
+done
+function example {
+	for ((;;))
+	do
+
+	done
+
+	for arg in `command`
+	do
+
+	done
+
+	while [ ]
+	do
+
+	done
+
+	while (())
+	do
+
+	done
+}
+example_c(){
+
+}
