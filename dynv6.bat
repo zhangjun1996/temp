@@ -7,7 +7,7 @@ REM
 
 @echo off
 setlocal EnableDelayedExpansion
-chcp 65001 >nul
+chcp 437 >nul
 title Dynv6 Auto Upload Script
 
 :: 使用前可将脚本加载于 组策略-本地计算机策略-计算机配置-Windows设置-启动
@@ -15,6 +15,9 @@ title Dynv6 Auto Upload Script
 set token=rF34sbvxzstNUmRsHy_3VXNf_iBcEx
 set hostname=zhangjun-g510.dynv6.net
 set daemon=3600
+
+:: 联想G510 win7，避免temp在ramdisk从而bitsadmin报错
+:: set tmp=%tmpp%
 
 :: 预设 
 set "MsgBox=call :MsgBox"
@@ -32,7 +35,7 @@ timeout /? >nul || (%MsgBox% "timeout.exe is missing." & exit /b 1)
 
 :: 获取IPv6 
 set "ipv6.old=%ipv6%"
-for /f "tokens=1,* delims=:" %%a in ('ipconfig ^| findstr /i /r /c:"^   IPv6.*" 2^>nul') do (
+for /f "tokens=1,* delims=:" %%a in ('ipconfig ^| findstr /i /r /c:"Temporary IPv6.*" 2^>nul') do (
 	set "ipv6=%%b" & set "ipv6=!ipv6:~1!"
 	goto :out1
 )
@@ -40,11 +43,11 @@ for /f "tokens=1,* delims=:" %%a in ('ipconfig ^| findstr /i /r /c:"^   IPv6.*" 
 
 :: 有变更时，上传 
 if not "%ipv6%"=="%ipv6.old%" (
-	>"%tmpp%\dynv6.log" echo;
-    echo "%Url%"
-	bitsadmin /transfer %random% /download "%Url%" "%tmpp%\dynv6.log"
-	findstr /i "unchanged updated" "%tmpp%\dynv6.log" || (
-		%MsgBox% "Some errors have occurred and you can check the log file for information.  %tmpp%\dynv6.log"
+	>"%tmp%\dynv6.log" echo;
+	echo "%Url%"
+	bitsadmin /transfer %random% /download "%Url%" "%tmp%\dynv6.log"
+	findstr /i "unchanged updated" "%tmp%\dynv6.log" || (
+		%MsgBox% "Some errors have occurred and you can check the log file for information.  %tmp%\dynv6.log"
 	)
 
 )
