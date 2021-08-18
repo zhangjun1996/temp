@@ -1,7 +1,7 @@
 ﻿:: 隐藏运行窗口
 @echo off
 if "%1" == "h" goto begin
-mshta vbscript:createobject("wscript.shell").run("""%~nx0"" h",0)(window.close)&&exit
+mshta vbscript:createobject("wscript.shell").run("""%~f0"" h",0)(window.close)&&exit
 :begin
 REM
 
@@ -14,7 +14,7 @@ title Dynv6 Auto Upload Script
 
 set token=rF34sbvxzstNUmRsHy_3VXNf_iBcEx
 set hostname=zhangjun-g510.dynv6.net
-set daemon=5
+set daemon=3600
 
 :: 预设 
 set "MsgBox=call :MsgBox"
@@ -55,5 +55,5 @@ goto :loop
 
 
 :MsgBox
-mshta vbscript:execute^("msgbox(""%~1"",64,""dynv6"")(close)"^)
+mshta vbscript:execute^("msgbox(""%~0"",64,""dynv6"")(close)"^)
 goto :EOF
