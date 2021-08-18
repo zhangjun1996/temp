@@ -1,4 +1,10 @@
-﻿
+﻿:: 隐藏运行窗口
+@echo off
+if "%1" == "h" goto begin
+mshta vbscript:createobject("wscript.shell").run("""%~nx0"" h",0)(window.close)&&exit
+:begin
+REM
+
 @echo off
 setlocal EnableDelayedExpansion
 chcp 65001 >nul
